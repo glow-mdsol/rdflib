@@ -1,3 +1,5 @@
+from rdflib.namespace import FOAF
+
 from rdflib import Graph, URIRef, BNode, RDF, Literal, Namespace
 from rdflib.collection import Collection
 from rdflib.plugins.serializers.turtle import TurtleSerializer
@@ -68,6 +70,32 @@ def test_turtle_valid_list():
 
     for o in g.objects(NS.s, NS.p):
         assert turtle_serializer.isValidList(o)
+
+
+def test_turtle_base():
+    content = """@base <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rel: <http://www.perceive.net/schemas/relationship/> .
+
+<#green-goblin>
+    rel:enemyOf <#spiderman> ;
+    a foaf:Person ;    # in the context of the Marvel universe
+    foaf:name "Green Goblin" .
+
+<#spiderman>
+    rel:enemyOf <#green-goblin> ;
+    a foaf:Person ;
+    foaf:name "Spiderman", "Человек-паук"@ru ."""
+
+    g = Graph()
+    g.parse(data=content, format='turtle')
+    assert (URIRef("http://example.org/#green-goblin"), RDF.type, FOAF.Person) in g
+
+    c = g.serialize(format="turtle", base="http://example.org/")
+    assert b('@base <http://example.org/> .') in c
+    assert b("<#green-goblin>") in c
 
 
 if __name__ == "__main__":
