@@ -3,6 +3,7 @@ from six.moves.urllib.request import urlopen
 import os
 import unittest
 from nose import SkipTest
+from SPARQLWrapper import SPARQLWrapper
 
 if os.getenv("TRAVIS"):
     raise SkipTest("Doesn't work in travis")
